@@ -3,19 +3,23 @@ import morgan from 'morgan';
 import cors from 'cors';
 
 import { userRouter } from '../routes';
+import { RoutesType } from '../types';
+import { config } from '../config';
 
 class Server {
 
-    private app: Application;
-    private port: string;
-    private baseUrl: string = '/api/v1';
-    private apiPaths = {
-        users: `${ this.baseUrl }/users`,
-    }
+    private app:      Application;
+    private port:     string;
+    private baseUrl:  string ;
+    private apiPaths: RoutesType;
 
     constructor() {
         this.app = express();
-        this.port = process.env.PORT || '7997';
+        this.port = config.port || '7997';
+        this.baseUrl = config.base_url || '/api/v1';
+        this.apiPaths = {
+            users: `${ this.baseUrl }/users`,
+        }
 
         //* Middlewares: 
         this.middlewares();
