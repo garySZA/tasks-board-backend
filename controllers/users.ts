@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 export const getUsers = ( req: Request, resp: Response ) => {
+    
     resp.json({
         msg: 'getUsers'
     });
@@ -30,7 +31,8 @@ export const putUser = ( req: Request, resp: Response ) => {
     
     resp.json({
         msg: 'putUser',
-        body
+        body,
+        id
     });
 };
 

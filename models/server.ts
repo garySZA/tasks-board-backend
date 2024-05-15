@@ -8,9 +8,9 @@ import { config } from '../config';
 
 class Server {
 
-    private app:      Application;
-    private port:     string;
-    private baseUrl:  string ;
+    private app: Application;
+    private port: string;
+    private baseUrl: string ;
     private apiPaths: RoutesType;
 
     constructor() {
@@ -19,7 +19,7 @@ class Server {
         this.baseUrl = config.base_url || '/api/v1';
         this.apiPaths = {
             users: `${ this.baseUrl }/users`,
-        }
+        };
 
         //* Middlewares: 
         this.middlewares();

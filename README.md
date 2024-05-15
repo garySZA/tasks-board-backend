@@ -1,1 +1,1 @@
-# Express App Template - Typescript
+# Express App - Typescript
