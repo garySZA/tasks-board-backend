@@ -1,32 +1,50 @@
 import express, { Application } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import color from 'colors';
 
-import { userRouter } from '../routes';
+import { authRouter, userRouter } from '../routes';
 import { RoutesType } from '../types';
 import { config } from '../config';
+import { db } from '../db';
 
 class Server {
 
     private app: Application;
-    private port: string;
+    private port: number;
     private baseUrl: string ;
     private apiPaths: RoutesType;
 
     constructor() {
         this.app = express();
-        this.port = config.port || '7997';
-        this.baseUrl = config.base_url || '/api/v1';
+        this.port = config.port || 7997;
+        this.baseUrl = config.baseUrl || '/api/v1';
         this.apiPaths = {
+            auth: `${ this.baseUrl }/auth`,
             users: `${ this.baseUrl }/users`,
         };
 
+        //* DB Connection
+        this.dbConnection();
+        
         //* Middlewares: 
         this.middlewares();
 
         //* Definiendo rutas
         this.routes();
 
+    }
+
+    async dbConnection(){
+        try {
+            
+            await db.authenticate();
+
+            console.log('Database online'.bgCyan);
+
+        } catch ( error ) {
+            console.log( error );
+        }
     }
 
     middlewares() {
@@ -45,12 +63,13 @@ class Server {
     }
 
     routes() {
+        this.app.use( this.apiPaths.auth, authRouter );
         this.app.use( this.apiPaths.users, userRouter );
     }
 
     listen() {
         this.app.listen( this.port, () => {
-            console.log(`Servidor corriendo en puerto: ${ this.port }`);
+            console.log('Servidor corriendo en puerto: '.underline.cyan, color.green( String(this.port) ));
         });
     }
 
