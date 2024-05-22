@@ -58,9 +58,16 @@ const register = async ( req: Request, res: Response ) => {
 
         const user = await User.create({ name, email, password: validPassword }); 
 
+        //* Generando JWT
+        const token = await generateJWT(user.iduser, user.name);
+
         res.json({
             ok: true,
-            user
+            user: {
+                uid: user.iduser,
+                name: user.name
+            },
+            token
         });
     } catch (error) {
         console.log(error);

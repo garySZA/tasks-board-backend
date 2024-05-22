@@ -3,6 +3,8 @@
 .env.production
 yarn.lock
 *.sql
+sequelize.json
 
 node_modules
 dist
+migrations

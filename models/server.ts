@@ -3,7 +3,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 import color from 'colors';
 
-import { authRouter, userRouter } from '../routes';
+import { authRouter, teamRoutes, userRouter } from '../routes';
 import { RoutesType } from '../types';
 import { config } from '../config';
 import { db } from '../db';
@@ -21,7 +21,9 @@ class Server {
         this.baseUrl = config.baseUrl || '/api/v1';
         this.apiPaths = {
             auth: `${ this.baseUrl }/auth`,
+            teams: `${ this.baseUrl }/teams`,
             users: `${ this.baseUrl }/users`,
+
         };
 
         //* DB Connection
@@ -64,6 +66,7 @@ class Server {
 
     routes() {
         this.app.use( this.apiPaths.auth, authRouter );
+        this.app.use( this.apiPaths.teams, teamRoutes );
         this.app.use( this.apiPaths.users, userRouter );
     }
 
