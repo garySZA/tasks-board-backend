@@ -5,6 +5,7 @@ export class Team extends Model<InferAttributes<Team>, InferCreationAttributes<T
     declare idTeam: CreationOptional<number>;
     declare nameTeam: string;
     declare description: string;
+    declare status: 1 | 0;
 }
 
 Team.init({
@@ -22,6 +23,12 @@ Team.init({
     description: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+
+    status: {
+        type: DataTypes.TINYINT,
+        allowNull: true,
+        defaultValue: 1
     }
 }, {
     sequelize: db,

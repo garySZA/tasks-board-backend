@@ -1,30 +1,38 @@
 import { Router } from 'express';
-import { validateJWT } from '../middlewares';
+import { check } from 'express-validator';
+
+import { validateFields, validateJWT } from '../middlewares';
 import { createTeam, deleteTeam, getTeam, getTeams, updateTeam } from '../controllers';
 
 export const teamRoutes = Router();
 
+    teamRoutes.use( validateJWT );
+
     //* GET ALL TEAMS
     teamRoutes.get('/', [
-        validateJWT
+        
     ], getTeams);
 
     //* GET TEAM BY ID
     teamRoutes.get('/:id', [
-        validateJWT
+        
     ], getTeam);
 
     //* CREATE TEAM
     teamRoutes.post('/', [
-        validateJWT
+        check('nameTeam', 'El campo es obligatorio').not().isEmpty(),
+        check('nameTeam', 'El campo debe tener al menos 3 caracteres').isLength({ min: 3 }),
+        check('nameTeam', 'El campo debe tener máximo 50 caracteres').isLength({ max: 50 }),
+        check('nameTeam', 'El campo debe ser un texto').isString(),
+        validateFields
     ], createTeam);
 
     //* UPDATE TEAM
     teamRoutes.put('/:id', [
-        validateJWT
+        
     ], updateTeam);
 
     //* DELETE TEAM
     teamRoutes.delete('/:id', [
-        validateJWT
+        
     ], deleteTeam);
