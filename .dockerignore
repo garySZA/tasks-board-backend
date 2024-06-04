@@ -1,0 +1,10 @@
+Dockerfile
+docker-compose.yml
+.git
+.idea
+node_modules
+dist
+.github
+npm-debug.log
+
+mysql

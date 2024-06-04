@@ -8,3 +8,4 @@ sequelize.json
 node_modules
 dist
 migrations
+mysql

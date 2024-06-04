@@ -1,0 +1,47 @@
+services:
+  app:
+    depends_on:
+      - db
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: taskboard-app-backend
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - path: .env
+    environment:
+      PORT: ${PORT}
+      BASE_URL: ${BASE_URL}
+      USER_DB: ${USER_DB}
+      USER_DB_PASSWORD: ${USER_DB_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      SECRET_JWT_SEED: ${SECRET_JWT_SEED}
+      EXPIRES_IN: ${EXPIRES_IN}
+    restart: always
+
+  db:
+    container_name: mysql_database
+    image: mysql:oracle
+    volumes:
+      - ./mysql:/var/lib/mysql
+    env_file:
+      - path: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${USER_DB_PASSWORD}
+    restart: always
+  
+  phpMyAdmin:
+    depends_on:
+      - db
+    image: phpmyadmin:5.2.1
+    ports:
+      - "8080:80"
+    env_file:
+      - path: ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${USER_DB_PASSWORD}
+      - PMA_HOST=db
+    restart: always
