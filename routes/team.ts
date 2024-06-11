@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
 
-import { validateFields, validateJWT } from '../middlewares';
-import { createTeam, deleteTeam, getTeam, getTeams, updateTeam } from '../controllers';
+import { isUserBlocked, validateFields, validateJWT } from '../middlewares';
+import { createTeam, deleteTeam, getTeam, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
 
 export const teamRoutes = Router();
 
     teamRoutes.use( validateJWT );
+    teamRoutes.use( isUserBlocked );
 
     //* GET ALL TEAMS
     teamRoutes.get('/', [
@@ -17,6 +18,11 @@ export const teamRoutes = Router();
     teamRoutes.get('/:id', [
         
     ], getTeam);
+
+    //* GET TEAMS BY CREATOR ID
+    teamRoutes.get('/creator/:id', [],
+        getTeamsByCreatorId
+    );
 
     //* CREATE TEAM
     teamRoutes.post('/', [

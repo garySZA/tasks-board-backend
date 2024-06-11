@@ -5,7 +5,7 @@ import color from 'colors';
 
 import { authRouter, teamRoutes, userRouter } from '../routes';
 import { RoutesType } from '../types';
-import { config } from '../config';
+import { config, corsConfig } from '../config';
 import { db } from '../db';
 
 class Server {
@@ -54,7 +54,7 @@ class Server {
         this.app.use( morgan( 'dev' ) );
 
         //* Cors
-        this.app.use( cors() );
+        this.app.use( cors( corsConfig ) );
 
         //* Lectura de body
         this.app.use( express.json() );

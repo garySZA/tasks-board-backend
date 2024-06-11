@@ -1,6 +1,8 @@
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { Team } from '../models';
+import { ICreateTeamRequest } from '../types';
 
+//* GETTERS
 const getTeams = async ( req: Request, res: Response ) => {
     const teams = await Team.findAll();
     
@@ -9,6 +11,7 @@ const getTeams = async ( req: Request, res: Response ) => {
         teams
     });
 };
+
 const getTeam = async ( req: Request, res: Response ) => {
     const { id } = req.params;
 
@@ -37,12 +40,34 @@ const getTeam = async ( req: Request, res: Response ) => {
         });
     }
 };
-const createTeam = async ( req: Request, res: Response ) => {
-    const { nameTeam, description } = req.body;
+
+const getTeamsByCreatorId = async ( req: Request, res: Response ) => {
+    const { id } = req.params;
     
     try {
         
-        const team = await Team.create({ nameTeam, description, status: 1 }); 
+        const teams = await Team.findAll({ where: { creatorId: id } });
+
+        res.json({
+            ok: true,
+            teams
+        });
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Contact with administrator'
+        });
+    }
+};
+
+const createTeam: RequestHandler = async ( req: Request, res: Response ) => {
+    const { nameTeam, description } = req.body;
+    
+    try {
+        const { uid } = req as ICreateTeamRequest;
+        const team = await Team.create({ nameTeam, description, status: 1, creatorId: uid }); 
 
         res.json({
             ok: true,
@@ -123,9 +148,10 @@ const deleteTeam = async ( req: Request, res: Response ) => {
 };
 
 export {
-    getTeams,
-    getTeam,
     createTeam,
+    deleteTeam,
+    getTeam,
+    getTeams,
+    getTeamsByCreatorId,
     updateTeam,
-    deleteTeam
 };

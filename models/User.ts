@@ -9,6 +9,7 @@ export class User extends Model<InferAttributes<User>, InferCreationAttributes<U
     declare password: string;
     declare status: CreationOptional<number>;
     declare image: CreationOptional<string>;
+
 }
 
 User.init({

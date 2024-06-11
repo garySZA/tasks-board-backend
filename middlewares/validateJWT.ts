@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
+
 import { config } from '../config';
 import { IDecodedToken, IRenewRequest } from '../types';
 
@@ -9,7 +10,7 @@ const validateJWT = ( req: Request, res: Response, next: NextFunction ) => {
     if (!token) {
         return res.status(401).json({
             ok: false,
-            msg: 'No hay token en la peticion',
+            msg: 'No hay token en la petición',
         });
     }
 

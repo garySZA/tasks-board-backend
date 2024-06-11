@@ -21,3 +21,9 @@ export interface IDecodedToken {
     uid: number;
     name: string;
 }
+
+export interface ICreateTeamRequest extends Request {
+    nameTeam: string;
+    description: string;
+    uid: number;
+}
