@@ -23,3 +23,5 @@ export type TVariables = {
         expiresIn: string;
     }
 }
+
+export type TTableNamesDB = 'user' | 'team' | 'userHasTeam';

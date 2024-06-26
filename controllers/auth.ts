@@ -28,12 +28,12 @@ const login = async ( req: Request, res: Response ) => {
         }
 
         //* Generar JWT
-        const token = await generateJWT( user.iduser, user.name );
+        const token = await generateJWT( user.idUser, user.name );
 
         //* Responder con userID, name y token
         res.json({
             msg: 'login',
-            uid: user.iduser,
+            uid: user.idUser,
             name: user.name,
             token
         });
@@ -59,12 +59,12 @@ const register = async ( req: Request, res: Response ) => {
         const user = await User.create({ name, email, password: validPassword }); 
 
         //* Generando JWT
-        const token = await generateJWT(user.iduser, user.name);
+        const token = await generateJWT(user.idUser, user.name);
 
         res.json({
             ok: true,
             user: {
-                uid: user.iduser,
+                uid: user.idUser,
                 name: user.name
             },
             token

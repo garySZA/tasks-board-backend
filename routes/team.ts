@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
 
-import { isUserBlocked, validateFields, validateJWT } from '../middlewares';
-import { createTeam, deleteTeam, getTeam, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
+import { existsElementByPK, isUserAssignedToTeam, isUserBlocked, validateFields, validateJWT } from '../middlewares';
+import { assignUserToTeam, createTeam, deleteTeam, getTeam, getTeamMembers, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
 
 export const teamRoutes = Router();
 
@@ -42,3 +42,20 @@ export const teamRoutes = Router();
     teamRoutes.delete('/:id', [
         
     ], deleteTeam);
+
+    //* ASSIGN USER TO TEAM
+    // TODO: Validar que no se pueda asignar varias veces a un usuario al mismo equipo
+    teamRoutes.post('/assign', [
+        check('userId', 'El campo es obligatorio').not().isEmpty(),
+        check('userId', 'El campo debe ser un número positivo válido').isInt({min: 1}),
+        check('userId').custom( value => existsElementByPK( value, 'user' ) ),
+        isUserAssignedToTeam,
+        
+        check('teamId', 'El campo es obligatorio').not().isEmpty(),
+        check('teamId', 'El campo debe ser un número positivo válido').isInt({min: 1}),
+        check('teamId').custom( value => existsElementByPK( value, 'team' ) ),
+        validateFields
+    ], assignUserToTeam);
+
+    //* GET TEAM MEMBERS
+    teamRoutes.get('/getTeamMembers/:id', [], getTeamMembers);

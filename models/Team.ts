@@ -1,21 +1,14 @@
-import { InferAttributes, InferCreationAttributes, Model, CreationOptional, DataTypes, ForeignKey, NonAttribute, BelongsToCreateAssociationMixin, Association } from 'sequelize';
+import { InferAttributes, InferCreationAttributes, Model, CreationOptional, DataTypes } from 'sequelize';
 import { db } from '../db';
-import { User } from './User';
+// import { User } from './User';
+// import { UserHasTeam } from './UserHasTeam';
 
-export class Team extends Model<InferAttributes<Team>, InferCreationAttributes<Team>> {
+class Team extends Model<InferAttributes<Team>, InferCreationAttributes<Team>> {
     declare idTeam: CreationOptional<number>;
     declare nameTeam: string;
     declare description: string;
     declare status: 1 | 0;
-    declare creatorId: ForeignKey<User['iduser']>;
-
-    declare creator?: NonAttribute<User>;
-
-    declare getCreator: BelongsToCreateAssociationMixin<User>;
-
-    static associations: {
-        creator: Association<Team, User>
-    };
+    declare creatorId: number;
 }
 
 Team.init({
@@ -46,7 +39,7 @@ Team.init({
         allowNull: false,
         references: {
             model: 'user',
-            key: 'iduser'
+            key: 'idUser'
         },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL'
@@ -54,5 +47,9 @@ Team.init({
 }, {
     sequelize: db,
     tableName: 'team',
-    timestamps: true
+    timestamps: true,
 });
+
+// Team.belongsToMany( User, { through: UserHasTeam, foreignKey: 'idTeam', as: 'users' } );
+
+export { Team };

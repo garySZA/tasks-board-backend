@@ -1,5 +1,5 @@
 import { Request, RequestHandler, Response } from 'express';
-import { Team } from '../models';
+import { User, Team, UserHasTeam } from '../models';
 import { ICreateTeamRequest } from '../types';
 
 //* GETTERS
@@ -147,11 +147,69 @@ const deleteTeam = async ( req: Request, res: Response ) => {
     }
 };
 
+//* Asignación de un usuario a un equipo
+const assignUserToTeam = async ( req: Request, res: Response ) => {
+    const { userId, teamId } = req.body;
+
+    try {
+        const userAssignedToTeam = await UserHasTeam.create({ idUser: userId, idTeam: teamId });
+
+        res.json({
+            ok: true,
+            userAssignedToTeam
+        });
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Contact with administrator'
+        });
+    }
+};
+
+//* Obtención de usuarios que se encuentran en el equipo
+const getTeamMembers = async ( req: Request, res: Response ) => {
+    const { id } = req.params;
+
+    try {
+        
+        const teamMembers = await UserHasTeam.findAll({
+            where: { idTeam: id },
+            include: [
+                {
+                    model: User,
+                    as: 'user'
+                },
+                {
+                    model: Team,
+                    as: 'team'
+                }
+            ]
+        });
+    
+        res.json({
+            msg: 'getTeamMembers',
+            teamMembers
+        });
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Contact with administrator'
+        });
+    }
+
+};
+
 export {
+    assignUserToTeam,
     createTeam,
     deleteTeam,
     getTeam,
     getTeams,
     getTeamsByCreatorId,
+    getTeamMembers,
     updateTeam,
 };
