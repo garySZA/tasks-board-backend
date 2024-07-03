@@ -1,24 +1,41 @@
-import { Op } from 'sequelize';
+import { Op, literal } from 'sequelize';
 import { NextFunction, Request, Response } from 'express';
 
-import { UserHasTeam } from '../models';
+import { User } from '../models';
 
-const isUserAssignedToTeam = async ( req: Request, res: Response, next: NextFunction ) => {
-    const { userId, teamId } = req.body;
-    
-    const assignation = await UserHasTeam.findOne({
+const isUsersAssignedToTeam = async ( req: Request, res: Response, next: NextFunction ) => {
+    const { users, teamId } = req.body;
+
+    const assignation = await User.findAll({
         where: {
-            [Op.and]: [{ idUser: userId, idTeam: teamId }]
-        }
+            idUser: {
+                [ Op.and ]: [
+                    {
+                        [ Op.in ]: literal(`
+                            (SELECT idUser
+                            FROM userHasTeam
+                            WHERE idTeam = ${teamId})
+                        `)
+                    },
+                    {
+                        [Op.in]: users
+                    }
+                ]
+            }
+        },
+        attributes: ['name', 'idUser']
     });
 
-    if( assignation ){
+    if( assignation.length > 0 ){
+        const multipleUsers = assignation.length > 1;
+
         return res.status(400).json({
-            msg: 'El usuario ya se encuentra asignado al equipo'
+            msg: `${ multipleUsers ? 'Los Usuarios' : 'El usuario' } ya se ${ multipleUsers ? 'encuentran asignados' : 'encuentra asignado' } al equipo`,
+            assigned: assignation
         });
     }
 
     next();
 };
 
-export { isUserAssignedToTeam };
+export { isUsersAssignedToTeam };

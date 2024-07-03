@@ -27,3 +27,8 @@ export interface ICreateTeamRequest extends Request {
     description: string;
     uid: number;
 }
+
+export interface IAssignUsersToTeamRequest extends Request {
+    teamId: number;
+    users: number[];
+}

@@ -1,5 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
-import { User, Team, UserHasTeam } from '../models';
+import { Op, literal } from 'sequelize';
+
+import { User, Team } from '../models';
 import { ICreateTeamRequest } from '../types';
 
 //* GETTERS
@@ -147,16 +149,16 @@ const deleteTeam = async ( req: Request, res: Response ) => {
     }
 };
 
-//* Asignación de un usuario a un equipo
+//* Asignación de usuarios a un equipo
 const assignUserToTeam = async ( req: Request, res: Response ) => {
-    const { userId, teamId } = req.body;
+    const { users, teamId } = req.body;
 
     try {
-        const userAssignedToTeam = await UserHasTeam.create({ idUser: userId, idTeam: teamId });
 
         res.json({
             ok: true,
-            userAssignedToTeam
+            users,
+            teamId
         });
     } catch (error) {
         console.log(error);
@@ -174,23 +176,34 @@ const getTeamMembers = async ( req: Request, res: Response ) => {
 
     try {
         
-        const teamMembers = await UserHasTeam.findAll({
-            where: { idTeam: id },
-            include: [
-                {
-                    model: User,
-                    as: 'user'
-                },
-                {
-                    model: Team,
-                    as: 'team'
+        // const teamMembers = await UserHasTeam.findAll({
+        //     attributes: [],
+        //     where: { idTeam: id },
+        //     include: [
+        //         {
+        //             model: User,
+        //             as: 'user',
+        //             attributes: ['name', 'idUser', 'image']
+        //         },
+        //     ]
+        // });
+
+        const teamMembers = await User.findAll({
+            where: {
+                idUser: {
+                    [ Op.in ]: literal(`
+                            (SELECT idUser
+                            FROM userHasTeam
+                            WHERE idTeam = ${ id })
+                        `)
                 }
-            ]
+            },
+            attributes: ['name', 'idUser', 'image']
         });
     
         res.json({
-            msg: 'getTeamMembers',
-            teamMembers
+            count: teamMembers.length,
+            users: teamMembers
         });
     } catch (error) {
         console.log(error);
@@ -203,10 +216,53 @@ const getTeamMembers = async ( req: Request, res: Response ) => {
 
 };
 
+//* Obtención de usuarios que no se encuentran registrados en un equipo
+const getOtherUsers = async ( req: Request, res: Response ) => {
+    const { id } = req.params;
+
+    try {
+        
+        const team = await Team.findByPk( id );
+
+        if( !team ){
+            res.status(400).json({
+                msg: 'No team found'
+            });
+        }
+
+        const otherUsers = await User.findAll({
+            where: {
+                idUser: {
+                    [ Op.notIn ]: literal(`
+                            (SELECT idUser
+                            FROM userHasTeam
+                            WHERE idTeam = ${ id })
+                        `)
+                }
+            },
+            attributes: ['name', 'idUser', 'image']
+        });
+
+        res.json({
+            count: otherUsers.length,
+            users: otherUsers
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Contact with administrator'
+        });
+    }
+};
+
 export {
     assignUserToTeam,
     createTeam,
     deleteTeam,
+    getOtherUsers,
     getTeam,
     getTeams,
     getTeamsByCreatorId,
