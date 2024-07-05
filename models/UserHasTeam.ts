@@ -7,6 +7,7 @@ class UserHasTeam extends Model<InferAttributes<UserHasTeam>, InferCreationAttri
     declare idUserHasTeam: CreationOptional<number>;
     declare idUser: ForeignKey<User['idUser']>;
     declare idTeam: ForeignKey<Team['idTeam']>;
+    declare status: CreationOptional<1 | 0>;
 
 }
 
@@ -38,6 +39,12 @@ UserHasTeam.init({
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE'
     },
+
+    status: {
+        type: DataTypes.TINYINT,
+        allowNull: false,
+        defaultValue: 1
+    }
 }, {
     sequelize: db,
     tableName: 'userHasTeam',

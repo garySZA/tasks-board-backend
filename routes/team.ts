@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
 
-import { existsElementByPK, isUsersAssignedToTeam, isUserBlocked, validateFields, validateJWT, existsUsersByPksList } from '../middlewares';
-import { assignUserToTeam, createTeam, deleteTeam, getOtherUsers, getTeam, getTeamMembers, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
+import { existsElementByPK, isUsersAssignedToTeam, isUserBlocked, validateFields, validateJWT, existsUsersByPksList, existsOldUsersByPksList } from '../middlewares';
+import { assignUsersToTeam, createTeam, deleteTeam, getOtherUsers, getTeam, getTeamMembers, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
 
 export const teamRoutes = Router();
 
@@ -45,16 +45,19 @@ export const teamRoutes = Router();
 
     //* ASSIGN USERs TO TEAM
     teamRoutes.post('/assign', [
-        check('users', 'El campo es obligatorio').not().isEmpty(),
-        check('users', 'El campo debe ser un número positivo válido').isArray(),
+        check('newUsers', 'El campo es obligatorio').not().isEmpty(),
+        check('newUsers', 'El campo debe ser una lista de ids válidos').isArray(),
+        check('oldUsers', 'El campo es obligatorio').not().isEmpty(),
+        check('oldUsers', 'El campo debe ser una lista de ids válidos').isArray(),
         existsUsersByPksList,
+        existsOldUsersByPksList,
         isUsersAssignedToTeam,
         
         check('teamId', 'El campo es obligatorio').not().isEmpty(),
         check('teamId', 'El campo debe ser un número positivo válido').isInt({min: 1}),
         check('teamId').custom( value => existsElementByPK( value, 'team' ) ),
         validateFields
-    ], assignUserToTeam);
+    ], assignUsersToTeam);
 
     //* GET TEAM MEMBERS
     teamRoutes.get('/getTeamMembers/:id', [], getTeamMembers);

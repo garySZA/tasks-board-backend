@@ -1,8 +1,8 @@
 import { Request, RequestHandler, Response } from 'express';
 import { Op, literal } from 'sequelize';
 
-import { User, Team } from '../models';
-import { ICreateTeamRequest } from '../types';
+import { User, Team, UserHasTeam } from '../models';
+import { IAssignUsersToTeamRequest, ICreateTeamRequest } from '../types';
 
 //* GETTERS
 const getTeams = async ( req: Request, res: Response ) => {
@@ -150,16 +150,35 @@ const deleteTeam = async ( req: Request, res: Response ) => {
 };
 
 //* Asignación de usuarios a un equipo
-const assignUserToTeam = async ( req: Request, res: Response ) => {
-    const { users, teamId } = req.body;
+const assignUsersToTeam = async ( req: Request, res: Response ) => {
+    const { newUsers, oldUsers, teamId } = req.body as IAssignUsersToTeamRequest;
+
+    const usersToRemove = oldUsers.filter( id => !newUsers.includes(id ));
+    const usersToAdd = newUsers.filter( id => !oldUsers.includes(id));
 
     try {
+        //* Eliminando usuarios antiguos y añadiendo nuevos
+        const [ usersRemoved, usersAssigned ] = await Promise.all([
+            UserHasTeam.update(
+                { status: 0 }, 
+                { 
+                    where: {
+                        [Op.and]: [
+                            { idUser: usersToRemove }, 
+                            { idTeam: teamId }
+                        ]
+                    },
+                },
+                
+            ),
+            UserHasTeam.bulkCreate(usersToAdd.map( userId => ({ idUser: userId, idTeam: teamId })))
+        ]);
 
         res.json({
-            ok: true,
-            users,
-            teamId
+            usersRemoved,
+            usersAssigned
         });
+
     } catch (error) {
         console.log(error);
 
@@ -168,6 +187,7 @@ const assignUserToTeam = async ( req: Request, res: Response ) => {
             msg: 'Contact with administrator'
         });
     }
+
 };
 
 //* Obtención de usuarios que se encuentran en el equipo
@@ -259,7 +279,7 @@ const getOtherUsers = async ( req: Request, res: Response ) => {
 };
 
 export {
-    assignUserToTeam,
+    assignUsersToTeam,
     createTeam,
     deleteTeam,
     getOtherUsers,

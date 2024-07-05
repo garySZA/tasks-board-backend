@@ -4,7 +4,7 @@ import { NextFunction, Request, Response } from 'express';
 import { User } from '../models';
 
 const isUsersAssignedToTeam = async ( req: Request, res: Response, next: NextFunction ) => {
-    const { users, teamId } = req.body;
+    const { newUsers, teamId } = req.body;
 
     const assignation = await User.findAll({
         where: {
@@ -18,7 +18,7 @@ const isUsersAssignedToTeam = async ( req: Request, res: Response, next: NextFun
                         `)
                     },
                     {
-                        [Op.in]: users
+                        [Op.in]: newUsers
                     }
                 ]
             }

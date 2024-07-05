@@ -30,5 +30,6 @@ export interface ICreateTeamRequest extends Request {
 
 export interface IAssignUsersToTeamRequest extends Request {
     teamId: number;
-    users: number[];
+    newUsers: number[];
+    oldUsers: number[];
 }
