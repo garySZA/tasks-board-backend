@@ -3,6 +3,7 @@ import { Op, literal } from 'sequelize';
 
 import { User, Team, UserHasTeam } from '../models';
 import { IAssignUsersToTeamRequest, ICreateTeamRequest } from '../types';
+import { getUsersIds } from '../helpers';
 
 //* GETTERS
 const getTeams = async ( req: Request, res: Response ) => {
@@ -150,13 +151,54 @@ const deleteTeam = async ( req: Request, res: Response ) => {
 };
 
 //* Asignación de usuarios a un equipo
+// TODO: Re-factorizar |
 const assignUsersToTeam = async ( req: Request, res: Response ) => {
     const { newUsers, oldUsers, teamId } = req.body as IAssignUsersToTeamRequest;
 
     const usersToRemove = oldUsers.filter( id => !newUsers.includes(id ));
-    const usersToAdd = newUsers.filter( id => !oldUsers.includes(id));
+    let usersToAdd = newUsers.filter( id => !oldUsers.includes(id));
 
     try {
+
+        //* Buscando usuarios que ya pertenecen al team pero se encuentran con status: 0
+        const disabledUsers = await User.findAll({
+            where: {
+                idUser: {
+                    [ Op.and ]: [
+                        {
+                            [ Op.in ]: literal(`
+                            (
+                                SELECT idUser
+                                FROM userHasTeam
+                                WHERE idTeam = ${teamId} AND status = 0
+                                )
+                                `)
+                        },
+                        {
+                            [ Op.in ]: usersToAdd
+                        }
+                    ]
+                }
+            }
+        });
+
+        const disabledUsersIds = getUsersIds( disabledUsers );
+
+        usersToAdd = usersToAdd.filter( id => !disabledUsersIds.includes(id));
+        
+        //* Cambiando status de usuarios ya registrados en el grupo de 0 a 1
+        await UserHasTeam.update(
+            { status: 1 }, 
+            {
+                where: {
+                    [Op.and]: [
+                        { idUser: { [ Op.in ]: disabledUsersIds } }, 
+                        { idTeam: teamId }
+                    ]
+                }
+            }
+        );
+
         //* Eliminando usuarios antiguos y añadiendo nuevos
         const [ usersRemoved, usersAssigned ] = await Promise.all([
             UserHasTeam.update(
@@ -176,7 +218,8 @@ const assignUsersToTeam = async ( req: Request, res: Response ) => {
 
         res.json({
             usersRemoved,
-            usersAssigned
+            usersAssigned,
+            teamId
         });
 
     } catch (error) {
@@ -214,7 +257,7 @@ const getTeamMembers = async ( req: Request, res: Response ) => {
                     [ Op.in ]: literal(`
                             (SELECT idUser
                             FROM userHasTeam
-                            WHERE idTeam = ${ id })
+                            WHERE idTeam = ${ id } and status = 1) 
                         `)
                 }
             },
@@ -256,7 +299,7 @@ const getOtherUsers = async ( req: Request, res: Response ) => {
                     [ Op.notIn ]: literal(`
                             (SELECT idUser
                             FROM userHasTeam
-                            WHERE idTeam = ${ id })
+                            WHERE idTeam = ${ id } and status = 1)
                         `)
                 }
             },
