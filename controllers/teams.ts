@@ -183,7 +183,7 @@ const assignUsersToTeam = async ( req: Request, res: Response ) => {
         });
 
         const disabledUsersIds = getUsersIds( disabledUsers );
-
+        
         usersToAdd = usersToAdd.filter( id => !disabledUsersIds.includes(id));
         
         //* Cambiando status de usuarios ya registrados en el grupo de 0 a 1
@@ -198,7 +198,7 @@ const assignUsersToTeam = async ( req: Request, res: Response ) => {
                 }
             }
         );
-
+        
         //* Eliminando usuarios antiguos y añadiendo nuevos
         const [ usersRemoved, usersAssigned ] = await Promise.all([
             UserHasTeam.update(

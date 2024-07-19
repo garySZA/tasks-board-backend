@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
 
-import { existsElementByPK, isUsersAssignedToTeam, isUserBlocked, validateFields, validateJWT, existsUsersByPksList, existsOldUsersByPksList } from '../middlewares';
+import { isUsersAssignedToTeam, isUserBlocked, validateFields, validateJWT, existsUsersByPksList, existsOldUsersByPksList, existsElementByPKParam } from '../middlewares';
 import { assignUsersToTeam, createTeam, deleteTeam, getOtherUsers, getTeam, getTeamMembers, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
 
 export const teamRoutes = Router();
@@ -55,7 +55,7 @@ export const teamRoutes = Router();
         
         check('teamId', 'El campo es obligatorio').not().isEmpty(),
         check('teamId', 'El campo debe ser un número positivo válido').isInt({min: 1}),
-        check('teamId').custom( value => existsElementByPK( value, 'team' ) ),
+        check('teamId').custom( value => existsElementByPKParam( value, 'team' ) ),
         validateFields
     ], assignUsersToTeam);
 

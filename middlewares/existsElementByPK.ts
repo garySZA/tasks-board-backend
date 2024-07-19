@@ -1,29 +1,18 @@
-import { Team, User } from '../models';
-import { TTableNamesDB } from '../types';
+import { NextFunction, Request, Response } from 'express';
+import { findElementById } from '../helpers';
 
-const existsElementByPK = async ( id: number, tableName: TTableNamesDB ) => {
-    let resource: User | Team | null = null;
+const existsProjectByPk = async ( req: Request, res: Response, next: NextFunction ) => {
+    const { id } = req.params;
     
-    switch ( tableName ) {
-        case 'user':
-            resource = await User.findByPk( id );
+    try {
+        await findElementById( +id, 'project' );
 
-            break;
-
-        case 'team':
-            resource = await Team.findByPk( id );
-
-            break;
-    
-        default:
-            break;
+    } catch (error) {
+        return res.status(400).json({
+            msg: 'Proyecto no existe'
+        });
     }
-
-    if( !resource ){
-        throw new Error('El recurso no existe');
-    }
+    next();
 };
 
-export {
-    existsElementByPK
-};
+export { existsProjectByPk };
