@@ -97,6 +97,12 @@ const updateProject = async ( req: Request, res: Response ) => {
             });
         }
 
+        if( project.nameProject === nameProject ){
+            return res.json({
+                project
+            });
+        }
+
         project = await project.update({ nameProject}); 
 
         res.json({

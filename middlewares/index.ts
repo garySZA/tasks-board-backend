@@ -4,6 +4,7 @@ export * from './existsElementByPKParam';
 export * from './existsProjectName';
 export * from './existsUsersByPksList';
 export * from './isTeamCreator';
+export * from './isUniqueEditedNameOfProject';
 export * from './isUserAssignedToTeam';
 export * from './isUserBlocked';
 export * from './validateFields';

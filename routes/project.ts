@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 
 import { createProject, deleteProject, getProjectById, getAllProjects, updateProject, getTeamProjects, reOpenProject } from '../controllers';
-import { existsProjectByPk, existsProjectName, isTeamCreator, validateFields, validateJWT } from '../middlewares';
+import { existsProjectByPk, existsProjectName, isTeamCreator, isUniqueEditedNameOfProject, validateFields, validateJWT } from '../middlewares';
 import { isValidTeam } from '../helpers';
 
 export const projectRouter = Router();
@@ -30,10 +30,10 @@ projectRouter.post('/', [
     validateFields
 ], createProject);
 
-// TODO: Validar que el nuevo nombre no sea igual al de otro que ya existe
 projectRouter.put('/:id', [
-    check('nameTeam', 'El nombre del proyecto es obligator').notEmpty(),
-    check('nameTeam', 'El nombre debe contener mínimo 6 letras').isLength({ min: 6 }),
+    check('nameProject', 'El nombre del proyecto es obligator').notEmpty(),
+    check('nameProject', 'El nombre debe contener mínimo 6 letras').isLength({ min: 6 }),
+    isUniqueEditedNameOfProject,
     validateFields
 ], updateProject);
 
