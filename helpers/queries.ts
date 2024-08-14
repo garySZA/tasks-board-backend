@@ -1,7 +1,7 @@
-import { Project, Team, User, UserHasTeam } from '../models';
+import { Card, Project, Team, User, UserHasTeam } from '../models';
 import { TResource, TTableNamesDB } from '../types';
 
-const findElementById = async ( id: number, table: TTableNamesDB ) => {
+const findElementById = async ( id: number, table: TTableNamesDB, showError: boolean = true ) => {
     let resource: TResource = null;
 
     switch ( table ) {
@@ -17,12 +17,16 @@ const findElementById = async ( id: number, table: TTableNamesDB ) => {
             resource = await Project.findByPk( id );
             break;
 
+        case 'card':
+            resource = await Card.findByPk( id );
+            break;
+
         default:
             resource = null;
             break;
     }
 
-    if( !resource ){
+    if( !resource && showError ){
         throw new Error('El recurso no existe');
     }
 

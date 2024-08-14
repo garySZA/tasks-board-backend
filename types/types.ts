@@ -1,12 +1,13 @@
-import { Project, Team, User, UserHasTeam } from '../models';
+import { Card, Project, Team, User, UserHasTeam } from '../models';
 
 export type RouteType = `${string}/${string}`;
 
 export type RoutesType = {
     auth: RouteType;
-    users: RouteType;
-    teams: RouteType;
     projects: RouteType;
+    tasks: RouteType;
+    teams: RouteType;
+    users: RouteType;
 }
 
 export type Dialect = 'mysql' | 'postgres' | 'mariadb' | 'mssql' | 'oracle' | 'snowflake' | 'sqlite';
@@ -27,6 +28,6 @@ export type TVariables = {
     }
 }
 
-export type TTableNamesDB = 'user' | 'team' | 'userHasTeam' | 'project';
+export type TTableNamesDB = 'user' | 'team' | 'userHasTeam' | 'project' | 'card';
 
-export type TResource = User | Team | Project | UserHasTeam | null;
+export type TResource = User | Team | Project | UserHasTeam | Card | null;

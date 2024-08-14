@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import { Project } from '../models';
+import { Card, Project } from '../models';
+import { db } from '../db';
 
 const getAllProjects = async ( req: Request, res: Response ) => {
     try {
@@ -26,7 +27,22 @@ const getTeamProjects = async ( req: Request, res: Response ) => {
     
     try {
         
-        const projects = await Project.findAll({ where: { idTeam } });
+        const projects = await Project.findAll({ 
+            attributes: [
+                'idProject',
+                'nameProject',
+                'status',
+                'createdAt',
+                'idTeam',
+                [ db.fn('COUNT', db.col('cards.idCard')), 'cardCount' ]
+            ],
+            include: [{
+                model: Card,
+                attributes: []
+            }],
+            where: { idTeam },
+            group: ['project.idProject']
+        });
 
         res.json({
             projects,

@@ -4,28 +4,28 @@ import { check } from 'express-validator';
 import { isUsersAssignedToTeam, isUserBlocked, validateFields, validateJWT, existsUsersByPksList, existsOldUsersByPksList, existsElementByPKParam } from '../middlewares';
 import { assignUsersToTeam, createTeam, deleteTeam, getOtherUsers, getTeam, getTeamMembers, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
 
-export const teamRoutes = Router();
+export const teamRouter = Router();
 
-    teamRoutes.use( validateJWT );
-    teamRoutes.use( isUserBlocked );
+    teamRouter.use( validateJWT );
+    teamRouter.use( isUserBlocked );
 
     //* GET ALL TEAMS
-    teamRoutes.get('/', [
+    teamRouter.get('/', [
         
     ], getTeams);
 
     //* GET TEAM BY ID
-    teamRoutes.get('/:id', [
+    teamRouter.get('/:id', [
         
     ], getTeam);
 
     //* GET TEAMS BY CREATOR ID
-    teamRoutes.get('/creator/:id', [],
+    teamRouter.get('/creator/:id', [],
         getTeamsByCreatorId
     );
 
     //* CREATE TEAM
-    teamRoutes.post('/', [
+    teamRouter.post('/', [
         check('nameTeam', 'El campo es obligatorio').not().isEmpty(),
         check('nameTeam', 'El campo debe tener al menos 3 caracteres').isLength({ min: 3 }),
         check('nameTeam', 'El campo debe tener máximo 50 caracteres').isLength({ max: 50 }),
@@ -34,17 +34,17 @@ export const teamRoutes = Router();
     ], createTeam);
 
     //* UPDATE TEAM
-    teamRoutes.put('/:id', [
+    teamRouter.put('/:id', [
         
     ], updateTeam);
 
     //* DELETE TEAM
-    teamRoutes.delete('/:id', [
+    teamRouter.delete('/:id', [
         
     ], deleteTeam);
 
     //* ASSIGN USERs TO TEAM
-    teamRoutes.post('/assign', [
+    teamRouter.post('/assign', [
         check('newUsers', 'El campo es obligatorio').not().isEmpty(),
         check('newUsers', 'El campo debe ser una lista de ids válidos').isArray(),
         check('oldUsers', 'El campo es obligatorio').not().isEmpty(),
@@ -60,7 +60,7 @@ export const teamRoutes = Router();
     ], assignUsersToTeam);
 
     //* GET TEAM MEMBERS
-    teamRoutes.get('/getTeamMembers/:id', [], getTeamMembers);
+    teamRouter.get('/getTeamMembers/:id', [], getTeamMembers);
 
     //* GET OTHER USERS
-    teamRoutes.get('/:id/getOtherUsers', [], getOtherUsers);
+    teamRouter.get('/:id/getOtherUsers', [], getOtherUsers);
