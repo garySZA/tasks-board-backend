@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Card } from '../models';
 import { getOffsetQuery } from '../helpers';
+import { HttpStatusCode, ResponseMessage } from '../types';
 
 const getTasksByProjectId = async ( req: Request, res: Response ) => {
     const { id } = req.params;
@@ -27,9 +28,9 @@ const getTasksByProjectId = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log(error);
 
-        return res.status(500).json({
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 
@@ -43,8 +44,8 @@ const getTaskById = async ( req: Request, res: Response ) => {
         const result = await Card.findByPk( idTask );
 
         if( !result ){
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
+            return res.status( HttpStatusCode.BAD_REQUEST ).json({
+                msg: ResponseMessage.NOT_FOUND
             });
         }
 
@@ -54,19 +55,20 @@ const getTaskById = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log( error );
 
-        return res.status(500).json({
+        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 };
 
 const createTask = async ( req: Request, res: Response ) => {
-    const { cardTitle, description, idProject, assignedTo } = req.body;
+    const { cardTitle, description, assignedTo } = req.body;
+    const { id } = req.params;
     
     try {
         
-        const card = await Card.create({ cardTitle, description, idProject, assignedTo });
+        const card = await Card.create({ cardTitle, description, idProject: +id, assignedTo });
 
         res.json({
             task: card
@@ -74,9 +76,9 @@ const createTask = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log(error);
         
-        return res.status(500).json({
+        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 
@@ -91,8 +93,8 @@ const updateTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
+            return res.status( HttpStatusCode.BAD_REQUEST ).json({
+                msg: ResponseMessage.NOT_FOUND
             });
         }
 
@@ -104,9 +106,9 @@ const updateTask = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log(error);
 
-        return res.status(500).json({
+        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 
@@ -120,8 +122,8 @@ const deleteTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
+            return res.status(HttpStatusCode.BAD_REQUEST).json({
+                msg: ResponseMessage.NOT_FOUND
             });
         }
 
@@ -133,9 +135,9 @@ const deleteTask = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log(error);
 
-        return res.status(500).json({
+        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 
@@ -150,8 +152,8 @@ const updateTaskStatus = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
+            return res.status( HttpStatusCode.BAD_REQUEST ).json({
+                msg: ResponseMessage.NOT_FOUND
             });
         }
 
@@ -169,9 +171,9 @@ const updateTaskStatus = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log(error);
 
-        return res.status(500).json({
+        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 
@@ -186,8 +188,8 @@ const assignTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
+            return res.status( HttpStatusCode.BAD_REQUEST ).json({
+                msg: ResponseMessage.NOT_FOUND
             });
         }
 
@@ -199,9 +201,9 @@ const assignTask = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log(error);
 
-        return res.status(500).json({
+        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 };
@@ -214,8 +216,8 @@ const reOpenTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status(400).json({
-                msg: 'Tarea no encontrada'
+            return res.status( HttpStatusCode.BAD_REQUEST ).json({
+                msg: ResponseMessage.NOT_FOUND
             });
         }
 
@@ -233,9 +235,9 @@ const reOpenTask = async ( req: Request, res: Response ) => {
     } catch (error) {
         console.log(error);
 
-        return res.status(500).json({
+        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
             ok: false,
-            msg: 'Contacte con el administrador'
+            msg: ResponseMessage.INTERNAL_SERVER_ERROR
         });
     }
 

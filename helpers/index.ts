@@ -2,6 +2,8 @@ export * from './dbValidators';
 export * from './getOffsetQuery';
 export * from './getUsersIds';
 export * from './getUsersNotFound';
+export * from './isUniqueEditedValue';
+export * from './isUniqueField';
 export * from './isValidElement';
 export * from './isValidTeam';
 export * from './jwt';

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { TTableNamesDB } from '../types';
+import { HttpStatusCode, ResponseMessage, TTableNamesDB } from '../types';
 import { findElementById } from '../helpers';
 
 const isValidElement = ( param: string, table: TTableNamesDB ) => {
@@ -9,14 +9,14 @@ const isValidElement = ( param: string, table: TTableNamesDB ) => {
         const element = await findElementById( +id, table, false );
 
         if( !element ) {
-            return res.status( 400 ).json({
-                msg: 'El elemento no existe'
+            return res.status( HttpStatusCode.NOT_FOUND ).json({
+                msg: ResponseMessage.NOT_FOUND
             });
         }
 
         if( element.status === 0 ){
-            return res.status( 400 ).json({
-                msg: 'El elemento está eliminado'
+            return res.status( HttpStatusCode.BAD_REQUEST ).json({
+                msg: ResponseMessage.RESOURCE_IS_DELETED
             });
         }
 
