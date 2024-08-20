@@ -2,12 +2,12 @@ import { Card } from '../models';
 import { ResponseMessage, TTableNamesDB } from '../types';
 import { TResource } from '../types/types';
 
-const isUniqueFieldByValue = async ( value: string | number, field: string, table: TTableNamesDB, showErrorMessage: boolean = true ) => {
+const isUniqueFieldByValue = async ( value: string | number, field: string, table: TTableNamesDB, showErrorMessage: boolean = true, query: {[key: string]: string} ) => {
     let resource: TResource[] | null;
     
     switch ( table ) {
         case 'card':
-            resource = await Card.findAll({ where: { [field]: value } });
+            resource = await Card.findAll({ where: { [field]: value, ...query } });
             
             break;
     

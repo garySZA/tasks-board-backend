@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { login, register, renew } from '../controllers';
-import { validateFields, validateJWT } from '../middlewares';
+import { errorHandler, validateFields, validateJWT } from '../middlewares';
 import { check } from 'express-validator';
 import { isUniqueField } from '../helpers';
 
@@ -27,3 +27,5 @@ authRouter.post('/register', [
 authRouter.post('/renew', [
     validateJWT
 ], renew);
+
+authRouter.use( errorHandler );

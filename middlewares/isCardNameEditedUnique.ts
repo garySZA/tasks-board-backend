@@ -1,14 +1,14 @@
 import { HttpStatusCode, ResponseMessage } from '../types';
-import { isUniqueFieldByValue } from './isUniqueField';
+import { isUniqueFieldByValue } from '../helpers/isUniqueField';
 import { TResource } from '../types/types';
 import { NextFunction, Request, Response } from 'express';
 import { Card } from '../models';
 
-export const isCardNameEditedUnique = async (req: Request, res: Response, next: NextFunction) => {    
-    const { idTask } = req.params;
+export const isCardNameUnique = async (req: Request, res: Response, next: NextFunction) => {    
+    const { id: idProject, idTask } = req.params;
     const { cardTitle } = req.body;
 
-    const resource: TResource[] | null = await isUniqueFieldByValue( cardTitle, 'cardTitle', 'card', false );
+    const resource: TResource[] | null = await isUniqueFieldByValue( cardTitle, 'cardTitle', 'card', false, { idProject: idProject } );
 
     if( resource ){
         if( resource.length > 2 ){
@@ -26,10 +26,7 @@ export const isCardNameEditedUnique = async (req: Request, res: Response, next: 
                 });
             }
         }
-
-        next();
-    } else {
-
-        next();
     }
+
+    next();
 };

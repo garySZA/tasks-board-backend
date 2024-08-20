@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
 
-import { isUsersAssignedToTeam, isUserBlocked, validateFields, validateJWT, existsUsersByPksList, existsOldUsersByPksList, existsElementByPKParam } from '../middlewares';
+import { isUsersAssignedToTeam, isUserBlocked, validateFields, validateJWT, existsUsersByPksList, existsOldUsersByPksList, existsElementByPKParam, errorHandler } from '../middlewares';
 import { assignUsersToTeam, createTeam, deleteTeam, getOtherUsers, getTeam, getTeamMembers, getTeams, getTeamsByCreatorId, updateTeam } from '../controllers';
 
 export const teamRouter = Router();
@@ -64,3 +64,5 @@ export const teamRouter = Router();
 
     //* GET OTHER USERS
     teamRouter.get('/:id/getOtherUsers', [], getOtherUsers);
+
+    teamRouter.use( errorHandler );

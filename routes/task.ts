@@ -1,42 +1,47 @@
 import { Router } from 'express';
 
-import { assignTask, createTask, deleteTask, getTaskById, getTasksByProjectId, reOpenTask, updateTask, updateTaskStatus } from '../controllers';
-import { isUserAssignedToTask, isUserIntoTeam, isUserToAssignValid, isUserValidToCards, isValidElement, validateFields, validateJWT } from '../middlewares';
+import { assignTask, createTask, deleteTask, getTaskById, getTasksByColumnId, getTasksByProjectId, reOpenTask, updateTask, updateTaskStatus } from '../controllers';
+import { errorHandler, isUserAssignedToTask, isUserIntoTeam, isUserToAssignValid, isUserValidToCards, isValidElement, validateFields, validateJWT } from '../middlewares';
 import { check } from 'express-validator';
 import { ResponseMessage } from '../types';
-import { isCardNameEditedUnique, isUniqueFieldByValue } from '../helpers';
+import { isCardNameUnique } from '../middlewares';
 
 const taskRouter = Router();
 const baseUrl = '/:id/tasks';
 
 taskRouter.use( validateJWT );
-// taskRouter.use( isUserValidToCards );
 
 taskRouter.get(`${ baseUrl }/`, [
     isUserValidToCards,
     validateFields
 ], getTasksByProjectId);
 
+taskRouter.get(`${ baseUrl }/column`, [
+    check('idColumn', ResponseMessage.FIELD_IS_REQUIRED).notEmpty(),
+    check('idColumn', ResponseMessage.VALID_NUMBER).isNumeric(),
+    check('idColumn', ResponseMessage.NUMBER_IN_RANGE + '1 a 5').isInt({ min: 1, max: 5 }),
+    isUserValidToCards,
+    validateFields
+], getTasksByColumnId);
+
 taskRouter.get(`${ baseUrl }/:idTask`, [
     isUserValidToCards,
     validateFields
 ], getTaskById);
 
-//TODO: la restricción de nombre debe aplicarse solo dentro de un proyecto, no puede existir dos tarjetas con el mismo nombre dentro de un proyecto, pero si en distintos proyectos
 taskRouter.post(`${ baseUrl }/`, [
     check('cardTitle', ResponseMessage.FIELD_IS_REQUIRED),
     check('cardTitle', ResponseMessage.MIN_LENGTH + '6 letras'),
-    check('cardTitle').custom(( value ) => isUniqueFieldByValue( value, 'cardTitle', 'card' )),
     check('description', ResponseMessage.FIELD_IS_REQUIRED),
     check('description', ResponseMessage.MIN_LENGTH + '6 letras'),
     isValidElement('id', 'project'),
     isUserValidToCards,
+    isCardNameUnique,
     validateFields
 ], createTask);
 
-//TODO: la restricción de nombre debe aplicarse solo dentro de un proyecto, no puede existir dos tarjetas con el mismo nombre dentro de un proyecto, pero si en distintos proyectos
 taskRouter.put(`${ baseUrl }/:idTask`, [
-    isCardNameEditedUnique,
+    isCardNameUnique,
     isUserValidToCards,
     validateFields
 ], updateTask);
@@ -66,5 +71,7 @@ taskRouter.put(`${ baseUrl }/:idTask/reopen`, [
     isUserValidToCards,
     validateFields
 ], reOpenTask);
+
+taskRouter.use( errorHandler );
 
 export { taskRouter };

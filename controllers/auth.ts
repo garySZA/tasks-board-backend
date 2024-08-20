@@ -1,11 +1,11 @@
-import { Request, RequestHandler, Response } from 'express';
+import { NextFunction, Request, RequestHandler, Response } from 'express';
 import bcrypt from 'bcryptjs';
 
-import { User } from '../models';
+import { NotFoundError, UnauthorizedError, User } from '../models';
 import { generateJWT } from '../helpers';
 import { IRenewRequest } from '../types';
 
-const login = async ( req: Request, res: Response ) => {
+const login = async ( req: Request, res: Response, next: NextFunction ) => {
     const { email, password } = req.body;
     
     try {
@@ -13,18 +13,14 @@ const login = async ( req: Request, res: Response ) => {
         const user = await User.findOne({ where: { email }});
 
         if( !user ){
-            return res.status(400).json({
-                msg: 'Usuario no existe'
-            });
+            throw new NotFoundError();
         }
         
         //* Verificar si las contraseñas coinciden
         const validPassword = bcrypt.compareSync(String( password ), user.password);
 
         if( !validPassword ){
-            return res.status(400).json({
-                msg: 'Email/Password no valido'
-            });
+            throw new UnauthorizedError();
         }
 
         //* Generar JWT
@@ -38,17 +34,11 @@ const login = async ( req: Request, res: Response ) => {
             token
         });
     } catch (error) {
-        console.log(error);
-
-        res.status(500).json({
-            ok: false,
-            msg: 'Contact to admin'
-        
-        });
+        next( error );
     }
 };
 
-const register = async ( req: Request, res: Response ) => {
+const register = async ( req: Request, res: Response, next: NextFunction ) => {
     const { name, email, password } = req.body;
 
     try {
@@ -70,17 +60,11 @@ const register = async ( req: Request, res: Response ) => {
             token
         });
     } catch (error) {
-        console.log(error);
-
-        res.status(500).json({
-            ok: false,
-            msg: 'Contact to admin'
-        
-        });
+        next( error );
     }
 };
 
-const renew: RequestHandler = async ( req: Request, res: Response ) => {
+const renew: RequestHandler = async ( req: Request, res: Response, next: NextFunction ) => {
     try {
         
         const { uid, name } = req as IRenewRequest;
@@ -96,10 +80,7 @@ const renew: RequestHandler = async ( req: Request, res: Response ) => {
         });
 
     } catch (error) {
-        res.status(500).json({
-            ok: false,
-            msg: 'Contact to admin'
-        });
+        next( error );
     }
 };
 

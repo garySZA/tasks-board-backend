@@ -1,9 +1,8 @@
-import { Request, Response } from 'express';
-import { Card } from '../models';
+import { NextFunction, Request, Response } from 'express';
+import { Card, NotFoundError } from '../models';
 import { getOffsetQuery } from '../helpers';
-import { HttpStatusCode, ResponseMessage } from '../types';
 
-const getTasksByProjectId = async ( req: Request, res: Response ) => {
+const getTasksByProjectId = async ( req: Request, res: Response, next: NextFunction ) => {
     const { id } = req.params;
     const { pageBL, limitBL, pageTD, limitTD, pagePG, limitPG, pageQA, limitQA, pageDN, limitDN } = req.body;
 
@@ -26,17 +25,36 @@ const getTasksByProjectId = async ( req: Request, res: Response ) => {
             done
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 
 };
 
-const getTaskById = async ( req: Request, res: Response ) => {
+const getTasksByColumnId = async ( req: Request, res: Response, next: NextFunction ) => {
+    const { limit = 5, page = 1 } = req.query;
+    const { id } = req.params;
+    const { idColumn } = req.body;
+    
+    try {
+
+        const [ tasks, count ] = await Promise.all([
+            Card.findAll({ where: { idProject: id, status: idColumn }, limit: +limit, offset: getOffsetQuery( +page, +limit ) }),
+            Card.count({ where: { idProject: id, status: idColumn } })
+        ]);
+
+        res.json({
+            count,
+            page: +page,
+            pages: Math.ceil( count / +limit ),
+            tasks,
+        });
+    } catch (error) {
+        next( error );
+    }
+
+};
+
+const getTaskById = async ( req: Request, res: Response, next: NextFunction ) => {
     const { idTask } = req.params;
     
     try {
@@ -44,25 +62,18 @@ const getTaskById = async ( req: Request, res: Response ) => {
         const result = await Card.findByPk( idTask );
 
         if( !result ){
-            return res.status( HttpStatusCode.BAD_REQUEST ).json({
-                msg: ResponseMessage.NOT_FOUND
-            });
+            throw new NotFoundError();
         }
 
         res.json({
             task: result
         });
     } catch (error) {
-        console.log( error );
-
-        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 };
 
-const createTask = async ( req: Request, res: Response ) => {
+const createTask = async ( req: Request, res: Response, next: NextFunction ) => {
     const { cardTitle, description, assignedTo } = req.body;
     const { id } = req.params;
     
@@ -74,17 +85,12 @@ const createTask = async ( req: Request, res: Response ) => {
             task: card
         });
     } catch (error) {
-        console.log(error);
-        
-        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 
 };
 
-const updateTask = async ( req: Request, res: Response ) => {
+const updateTask = async ( req: Request, res: Response, next: NextFunction ) => {
     const { idTask } = req.params;
     const { cardTitle, description } = req.body;
     
@@ -93,9 +99,7 @@ const updateTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status( HttpStatusCode.BAD_REQUEST ).json({
-                msg: ResponseMessage.NOT_FOUND
-            });
+            throw new NotFoundError();
         }
 
         await card.update({ cardTitle: cardTitle.length > 0 ? cardTitle : card.cardTitle, description: description.length > 0 ? description : card.description });
@@ -104,17 +108,12 @@ const updateTask = async ( req: Request, res: Response ) => {
             task: card
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 
 };
 
-const deleteTask = async ( req: Request, res: Response ) => {
+const deleteTask = async ( req: Request, res: Response, next: NextFunction ) => {
     const { idTask } = req.params;
     
     try {
@@ -122,9 +121,7 @@ const deleteTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status(HttpStatusCode.BAD_REQUEST).json({
-                msg: ResponseMessage.NOT_FOUND
-            });
+            throw new NotFoundError();
         }
 
         await card.update({ status: 0 });
@@ -133,17 +130,12 @@ const deleteTask = async ( req: Request, res: Response ) => {
             taskDeleted: card
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 
 };
 
-const updateTaskStatus = async ( req: Request, res: Response ) => {
+const updateTaskStatus = async ( req: Request, res: Response, next: NextFunction ) => {
     const { idTask } = req.params;
     const { status } = req.body;
     
@@ -152,9 +144,7 @@ const updateTaskStatus = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status( HttpStatusCode.BAD_REQUEST ).json({
-                msg: ResponseMessage.NOT_FOUND
-            });
+            throw new NotFoundError();
         }
 
         if( card.status === status ){
@@ -169,17 +159,12 @@ const updateTaskStatus = async ( req: Request, res: Response ) => {
             task: card
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 
 };
 
-const assignTask = async ( req: Request, res: Response ) => {
+const assignTask = async ( req: Request, res: Response, next: NextFunction ) => {
     const { idTask } = req.params;
     const { idUser } = req.body;
 
@@ -188,9 +173,7 @@ const assignTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status( HttpStatusCode.BAD_REQUEST ).json({
-                msg: ResponseMessage.NOT_FOUND
-            });
+            throw new NotFoundError();
         }
 
         await card.update({ assignedTo: idUser });
@@ -199,16 +182,11 @@ const assignTask = async ( req: Request, res: Response ) => {
             task: card
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 };
 
-const reOpenTask = async ( req: Request, res: Response ) => {
+const reOpenTask = async ( req: Request, res: Response, next: NextFunction ) => {
     const { idTask } = req.params;
 
     try {
@@ -216,9 +194,7 @@ const reOpenTask = async ( req: Request, res: Response ) => {
         const card = await Card.findByPk( idTask );
 
         if( !card ){
-            return res.status( HttpStatusCode.BAD_REQUEST ).json({
-                msg: ResponseMessage.NOT_FOUND
-            });
+            throw new NotFoundError();
         }
 
         if( card.status !== 0 ){
@@ -233,12 +209,7 @@ const reOpenTask = async ( req: Request, res: Response ) => {
             task: card
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status( HttpStatusCode.INTERNAL_SERVER_ERROR ).json({
-            ok: false,
-            msg: ResponseMessage.INTERNAL_SERVER_ERROR
-        });
+        next( error );
     }
 
 };
@@ -248,8 +219,9 @@ export {
     createTask,
     deleteTask,
     getTaskById,
+    getTasksByColumnId,
     getTasksByProjectId,
     reOpenTask,
     updateTask,
-    updateTaskStatus  
+    updateTaskStatus,
 };

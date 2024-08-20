@@ -30,10 +30,10 @@ class Server {
 
         //* DB Connection
         this.dbConnection();
-        
+
         //* Middlewares: 
         this.middlewares();
-
+        
         //* Definiendo rutas
         this.routes();
 

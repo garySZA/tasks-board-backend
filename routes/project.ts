@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { check } from 'express-validator';
 
 import { createProject, deleteProject, getProjectById, getAllProjects, updateProject, getTeamProjects, reOpenProject } from '../controllers';
-import { existsProjectByPk, existsProjectName, isTeamCreator, isUniqueEditedNameOfProject, validateFields, validateJWT } from '../middlewares';
+import { errorHandler, existsProjectByPk, existsProjectName, isTeamCreator, isUniqueEditedNameOfProject, validateFields, validateJWT } from '../middlewares';
 import { isValidTeam } from '../helpers';
 
 export const projectRouter = Router();
@@ -54,3 +54,5 @@ projectRouter.put('/reOpenProject/:id', [
     isTeamCreator,
     validateFields
 ], reOpenProject);
+
+projectRouter.use( errorHandler );

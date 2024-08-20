@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
-import { Card, Project } from '../models';
+import { NextFunction, Request, Response } from 'express';
+import { Card, NotFoundError, Project } from '../models';
 import { db } from '../db';
 
-const getAllProjects = async ( req: Request, res: Response ) => {
+const getAllProjects = async ( req: Request, res: Response, next: NextFunction ) => {
     try {
         
         const projects = await Project.findAll();
@@ -13,16 +13,11 @@ const getAllProjects = async ( req: Request, res: Response ) => {
         });
 
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            ok: false,
-            msg: 'Contacte con el administrador'
-        });
+        next( error );
     }
 };
 
-const getTeamProjects = async ( req: Request, res: Response ) => {
+const getTeamProjects = async ( req: Request, res: Response, next: NextFunction ) => {
     const { idTeam } = req.params;
     
     try {
@@ -49,16 +44,11 @@ const getTeamProjects = async ( req: Request, res: Response ) => {
             count: projects.length
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            ok: false,
-            msg: 'Contacte con el administrador'
-        });
+        next( error );
     }
 };
 
-const getProjectById = async ( req: Request, res: Response ) => {
+const getProjectById = async ( req: Request, res: Response, next: NextFunction ) => {
     const { id } = req.params;
     
     try {
@@ -68,17 +58,12 @@ const getProjectById = async ( req: Request, res: Response ) => {
             project
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            ok: false,
-            msg: 'Contacte con el administrador'
-        });
+        next( error );
     }
     
 };
 
-const createProject = async ( req: Request, res: Response ) => {
+const createProject = async ( req: Request, res: Response, next: NextFunction ) => {
     const { nameProject, idTeam } = req.body;
     
     try {
@@ -89,17 +74,12 @@ const createProject = async ( req: Request, res: Response ) => {
             newProject
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            ok: false,
-            msg: 'Contacte con el administrador'
-        });
+        next( error );
     }
 
 };
 
-const updateProject = async ( req: Request, res: Response ) => {
+const updateProject = async ( req: Request, res: Response, next: NextFunction ) => {
     const { id } = req.params;
     const { nameProject } = req.body;
     
@@ -108,9 +88,7 @@ const updateProject = async ( req: Request, res: Response ) => {
         let project = await Project.findByPk( id );
         
         if( !project ){
-            return res.status(400).json({
-                msg: 'Proyecto no encontrado'
-            });
+            throw new NotFoundError();
         }
 
         if( project.nameProject === nameProject ){
@@ -125,25 +103,18 @@ const updateProject = async ( req: Request, res: Response ) => {
             project
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            ok: false,
-            msg: 'Contacte con el administrador'
-        });
+        next( error );
     }
 };
 
-const deleteProject = async ( req: Request, res: Response ) => {
+const deleteProject = async ( req: Request, res: Response, next: NextFunction ) => {
     const { id } = req.params;
 
     try {
         const project = await Project.findByPk( id );
 
         if( !project ){
-            return res.status(400).json({
-                msg: 'Proyecto no encontrado'
-            });
+            throw new NotFoundError();
         }
 
         const projectDeleted = await project.update({ status: 0 });
@@ -152,25 +123,18 @@ const deleteProject = async ( req: Request, res: Response ) => {
             projectDeleted
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            ok: false,
-            msg: 'Contacte con el administrador'
-        });
+        next( error );
     }
 };
 
-const reOpenProject = async ( req: Request, res: Response ) => {
+const reOpenProject = async ( req: Request, res: Response, next: NextFunction ) => {
     const { id } = req.params;
 
     try {
         const project = await Project.findByPk( id );
 
         if( !project ){
-            return res.status(400).json({
-                msg: 'Proyecto no encontrado'
-            });
+            throw new NotFoundError();
         }
 
         const projectReopened = await project.update({ status: 1 });
@@ -179,12 +143,7 @@ const reOpenProject = async ( req: Request, res: Response ) => {
             projectReopened
         });
     } catch (error) {
-        console.log(error);
-
-        return res.status(500).json({
-            ok: false,
-            msg: 'Contacte con el administrador'
-        });
+        next( error );
     }
 };
 

@@ -16,7 +16,7 @@ export enum ResponseMessage {
     OK = 'Operación realizada con éxito',
     RESOURCE_IS_DELETED = 'El recurso fue eliminado',
     SERVICE_UNAVAILABLE = 'Servicio no disponible. Por favor, intenta de nuevo más tarde.',
-    UNAUTHORIZED = 'No autorizado. Por favor, inicia sesión.',
+    UNAUTHORIZED = 'No autorizado. Credenciales incorrectas',
     UPDATED = 'Recurso actualizado correctamente',
     VALID_NUMBER = 'Debe ser un número válido',
     VALIDATION_ERROR = 'Los datos proporcionados no son válidos',

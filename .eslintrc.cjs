@@ -17,6 +17,7 @@ module.exports = {
     'no-multi-spaces': 'error',
     'prefer-const': 'error',
     'eqeqeq': ['error', 'always'],
+    '@typescript-eslint/no-unused-vars': ['error', { 'varsIgnorePattern': '^_', 'argsIgnorePattern': '^_' }]
     // 'prettier/prettier': ['error']
   },
 }
