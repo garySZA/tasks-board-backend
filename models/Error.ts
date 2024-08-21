@@ -10,6 +10,12 @@ export class CustomError extends Error {
     }
 }
 
+export class InvalidQueryError extends CustomError {
+    constructor( parameter: string ){
+        super( `${ResponseMessage.INVALID_QUERY_PARAMETER}: ${ parameter }`, HttpStatusCode.BAD_REQUEST );
+    }
+}
+
 export class NotFoundError extends CustomError {
     constructor(){
         super( ResponseMessage.NOT_FOUND, HttpStatusCode.NOT_FOUND );

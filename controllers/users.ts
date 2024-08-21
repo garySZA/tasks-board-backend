@@ -1,13 +1,31 @@
 import { NextFunction, Request, Response } from 'express';
-import { User } from '../models';
+import bcrypt from 'bcryptjs';
+
+import { InvalidQueryError, NotFoundError, User } from '../models';
+import { createPagination } from '../helpers';
 
 export const getUsers = async ( req: Request, resp: Response, next: NextFunction ) => {
-    
+    const { limit, page } = req.query;
+
     try {
-        const users = await User.findAll();
+
+        if( typeof limit !== 'string' ){
+            throw new InvalidQueryError( 'limit' );
+        }
+
+        if( typeof page !== 'string' ){
+            throw new InvalidQueryError( 'page' );
+        }
+
+        const [ users, count ] = await Promise.all([
+            User.findAll({ ...createPagination( limit as string, page as string ), attributes:['idUser', 'name', 'email', 'status', 'image', 'role', 'createdAt'] }),
+            User.count()
+        ]);
     
         resp.json({
-            ok: true,
+            count,
+            page,
+            pages: Math.ceil( count / +limit ),
             users
         });
     } catch (error) {
@@ -15,29 +33,38 @@ export const getUsers = async ( req: Request, resp: Response, next: NextFunction
     }
 };
 
-export const getUser = ( req: Request, resp: Response, next: NextFunction ) => {
+export const getUser = async ( req: Request, resp: Response, next: NextFunction ) => {
     
     try {
         
-        const { id } = req.params;
+        const { idUser } = req.params;
+
+        const user = await User.findByPk( idUser, { attributes:['idUser', 'name', 'email', 'status', 'image', 'role', 'createdAt'] } );
+        
+        if( !user ){
+            throw new NotFoundError();
+        }
         
         resp.json({
-            msg: 'getUser',
-            id
+            user
         });
     } catch (error) {
         next( error );
     }
 };
 
-export const postUser = ( req: Request, resp: Response, next: NextFunction ) => {
-    const { body } = req;
+export const postUser = async ( req: Request, resp: Response, next: NextFunction ) => {
+    const { name, email, password, image } = req.body;
     
     try {
         
+        const salt = bcrypt.genSaltSync();
+        const validPassword = bcrypt.hashSync( String( password ), salt );
+
+        const user = await User.create({ name, email, password: validPassword, image : image ? image : null });
+
         resp.json({
-            msg: 'postUser',
-            body
+            newUser: user
         });
     } catch (error) {
         next( error );
@@ -45,16 +72,22 @@ export const postUser = ( req: Request, resp: Response, next: NextFunction ) => 
 
 };
 
-export const putUser = ( req: Request, resp: Response, next: NextFunction ) => {
-    const { id } = req.params;
-    const { body } = req;
+export const putUser = async ( req: Request, resp: Response, next: NextFunction ) => {
+    const { idUser } = req.params;
+    const { name, email, image } = req.body;
     
     try {
         
+        const user = await User.findByPk( idUser, { attributes:['idUser', 'name', 'email', 'status', 'image', 'role', 'createdAt'] } );
+
+        if( !user ){
+            throw new NotFoundError();
+        }
+
+        user.update({ name: name ? name : user.name, email: email ? email : user.email, image: image ? image : user.image });
+
         resp.json({
-            msg: 'putUser',
-            body,
-            id
+            userUpdated: user
         });
     } catch (error) {
         next( error );

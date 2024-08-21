@@ -30,10 +30,10 @@ taskRouter.get(`${ baseUrl }/:idTask`, [
 ], getTaskById);
 
 taskRouter.post(`${ baseUrl }/`, [
-    check('cardTitle', ResponseMessage.FIELD_IS_REQUIRED),
-    check('cardTitle', ResponseMessage.MIN_LENGTH + '6 letras'),
-    check('description', ResponseMessage.FIELD_IS_REQUIRED),
-    check('description', ResponseMessage.MIN_LENGTH + '6 letras'),
+    check('cardTitle', ResponseMessage.FIELD_IS_REQUIRED).notEmpty(),
+    check('cardTitle', ResponseMessage.MIN_LENGTH + '6 letras').isLength({ min: 6}),
+    check('description', ResponseMessage.FIELD_IS_REQUIRED).notEmpty(),
+    check('description', ResponseMessage.MIN_LENGTH + '6 letras').isLength({ min: 6}),
     isValidElement('id', 'project'),
     isUserValidToCards,
     isCardNameUnique,
