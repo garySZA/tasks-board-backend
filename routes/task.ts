@@ -16,10 +16,8 @@ taskRouter.get(`${ baseUrl }/`, [
     validateFields
 ], getTasksByProjectId);
 
+//TODO: validar que el campo column este en el rango de 1 a 5
 taskRouter.get(`${ baseUrl }/column`, [
-    check('idColumn', ResponseMessage.FIELD_IS_REQUIRED).notEmpty(),
-    check('idColumn', ResponseMessage.VALID_NUMBER).isNumeric(),
-    check('idColumn', ResponseMessage.NUMBER_IN_RANGE + '1 a 5').isInt({ min: 1, max: 5 }),
     isUserValidToCards,
     validateFields
 ], getTasksByColumnId);

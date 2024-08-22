@@ -31,18 +31,18 @@ const getTasksByProjectId = async ( req: Request, res: Response, next: NextFunct
 };
 
 const getTasksByColumnId = async ( req: Request, res: Response, next: NextFunction ) => {
-    const { limit = 5, page = 1 } = req.query;
+    const { limit = 5, page = 1, column = 1 } = req.query;
     const { id } = req.params;
-    const { idColumn } = req.body;
     
     try {
 
         const [ tasks, count ] = await Promise.all([
-            Card.findAll({ where: { idProject: id, status: idColumn }, limit: +limit, offset: getOffsetQuery( +page, +limit ) }),
-            Card.count({ where: { idProject: id, status: idColumn } })
+            Card.findAll({ where: { idProject: id, status: +column }, limit: +limit, offset: getOffsetQuery( +page, +limit ) }),
+            Card.count({ where: { idProject: id, status: +column } })
         ]);
 
         res.json({
+            id: column,
             count,
             page: +page,
             pages: Math.ceil( count / +limit ),
