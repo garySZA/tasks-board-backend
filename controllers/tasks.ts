@@ -74,12 +74,12 @@ const getTaskById = async ( req: Request, res: Response, next: NextFunction ) =>
 };
 
 const createTask = async ( req: Request, res: Response, next: NextFunction ) => {
-    const { cardTitle, description, assignedTo } = req.body;
+    const { cardTitle, description, assignedTo, status } = req.body;
     const { id } = req.params;
     
     try {
         
-        const card = await Card.create({ cardTitle, description, idProject: +id, assignedTo });
+        const card = await Card.create({ cardTitle, description, idProject: +id, assignedTo, status });
 
         res.json({
             task: card
